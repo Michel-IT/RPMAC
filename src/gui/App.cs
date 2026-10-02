@@ -1191,7 +1191,7 @@ namespace RPMac {
             }
             ApplyCurveFromUi(src);
             ClearActivePreset();
-            status.Text = string.Format(I18n.T("Curve copied to {0} other fan{1}."), n, n == 1 ? "" : "s");
+            status.Text = string.Format(I18n.T(n == 1 ? "Curve copied to {0} other fan." : "Curve copied to {0} other fans."), n);
         }
 
         // Curva -> texto para el config: "t0,r0;t1,r1;..."
@@ -1498,7 +1498,7 @@ namespace RPMac {
                 if (double.IsNaN(v) || v < 5 || v > 120) continue;
                 string g = TempGroup(c[0]);
                 if (g != lastGroup) {
-                    col.Children.Add(new TextBlock { Text = g, FontSize = 9.5, Foreground = SUB, Opacity = 0.65, Margin = new Thickness(0, shown == 0 ? 2 : 9, 0, 3) });
+                    col.Children.Add(new TextBlock { Text = I18n.T(g), FontSize = 9.5, Foreground = SUB, Opacity = 0.65, Margin = new Thickness(0, shown == 0 ? 2 : 9, 0, 3) });
                     lastGroup = g;
                 }
                 var g2 = new Grid { Margin = new Thickness(0, 2.5, 0, 2.5) };
@@ -1521,7 +1521,7 @@ namespace RPMac {
 
         // Página de sensores: una tarjeta por grupo (CPU / GPU / SYSTEM) en columnas.
         void BuildTempsPane(Panel parent) {
-            var groups = new[] { I18n.T("CPU"), I18n.T("GPU"), I18n.T("SYSTEM") };
+            var groups = new[] { "CPU", "GPU", "SYSTEM" };   // se comparan con TempGroup(): se traducen solo al mostrarlos
             var row = new Grid();
             for (int i = 0; i < groups.Length; i++)
                 row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -1529,13 +1529,13 @@ namespace RPMac {
             int total = 0;
             for (int i = 0; i < groups.Length; i++) {
                 var col = new StackPanel();
-                col.Children.Add(SectionLabel(groups[i], 0));
+                col.Children.Add(SectionLabel(I18n.T(groups[i]), 0));
                 int shown = 0;
                 foreach (var c in SENSORS) {
                     if (TempGroup(c[0]) != groups[i]) continue;
                     double v = Smc.ReadTemp(c[0]);
                     if (double.IsNaN(v) || v < 5 || v > 120) continue;
-                    col.Children.Add(TempRowKeyed(c[1], c[0]));
+                    col.Children.Add(TempRowKeyed(I18n.T(c[1]), c[0]));
                     shown++;
                 }
                 if (shown == 0) col.Children.Add(new TextBlock { Text = I18n.T("None detected"), Foreground = SUB, Opacity = 0.6, FontSize = 12 });
@@ -1675,7 +1675,7 @@ namespace RPMac {
                 overlayWrap.Children.Clear();
                 overlayItemList = new List<string[]>();
                 foreach (var f in fans) overlayItemList.Add(new[] { "fan" + f.Index, I18n.T("Fan ") + f.Index });
-                foreach (var c in SENSORS) if (curatedLabels.ContainsKey(c[0])) overlayItemList.Add(new[] { c[0], c[1] });
+                foreach (var c in SENSORS) if (curatedLabels.ContainsKey(c[0])) overlayItemList.Add(new[] { c[0], I18n.T(c[1]) });
                 foreach (var it2 in overlayItemList) overlayWrap.Children.Add(MakeOverlayChip(it2[0], it2[1]));
             }
             RefreshOverlayNow();
@@ -1767,7 +1767,7 @@ namespace RPMac {
             col.Children.Add(new TextBlock { Text = I18n.T("Theme"), Foreground = TXT, FontSize = 13, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 16, 0, 8) });
             var wrap = new WrapPanel { Orientation = Orientation.Horizontal };
             foreach (var t in THEMES) {
-                string key = t[0]; string label = t[1];
+                string key = t[0]; string label = I18n.T(t[1]);
                 var tb = new TextBlock { Text = label, FontSize = 13, FontWeight = FontWeights.SemiBold };
                 var bd = new Border { CornerRadius = new CornerRadius(9), Padding = new Thickness(15, 8, 15, 8), Margin = new Thickness(0, 0, 8, 8), Cursor = Cursors.Hand, Child = tb };
                 bd.MouseEnter += delegate { if (Settings.Theme != key) bd.Opacity = 0.82; };
@@ -1801,22 +1801,23 @@ namespace RPMac {
             var row = new DockPanel { LastChildFill = true };
             var labels = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
             // Language selector
-            var langRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 14, 0, 0) };
+            var langRow = new StackPanel { Orientation = Orientation.Horizontal };
             langRow.Children.Add(new TextBlock { Text = I18n.T("Language"), Foreground = TXT, FontSize = 13, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center });
             col.Children.Add(langRow);
             col.Children.Add(new TextBlock { Text = I18n.T("Choose the interface language."), Foreground = SUB, FontSize = 11, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 2, 0, 8) });
-            var langChips = new StackPanel { Orientation = Orientation.Horizontal };
+            var langChips = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 14) };
             string[] langs = { "en", "it" };
             string[] langLabels = { "English", "Italiano" };
             for (int li = 0; li < langs.Length; li++) {
                 string lc = langs[li];
                 bool lact = (Settings.Language == lc);
                 var lbd = Chip(langLabels[li], lact ? ACCENT : CHIP, lact ? Brushes.White : TXT, delegate {
+                    if (Settings.Language == lc) return;
                     Settings.Language = lc;
                     Settings.Save();
-                    I18n.SetLanguage(lc);
-                    // Rebuild the window to apply the new language
-                    try { System.Diagnostics.Process.Start(System.Reflection.Assembly.GetExecutingAssembly().Location); } catch { }
+                    // Relaunch to apply the new language. The new instance waits for this one
+                    // to exit (see Main) instead of bowing out to the single-instance mutex.
+                    try { System.Diagnostics.Process.Start(System.Reflection.Assembly.GetExecutingAssembly().Location, App.RELAUNCH_ARG); } catch { }
                     QuitApp();
                 });
                 lbd.Margin = new Thickness(0, 0, 8, 0);
@@ -2131,7 +2132,7 @@ namespace RPMac {
             // --- Que mostrar (ventiladores + sensores presentes) ---
             var items = new List<string[]>();
             foreach (var f in fans) items.Add(new[] { "fan" + f.Index, I18n.T("Fan ") + f.Index });
-            foreach (var c in SENSORS) if (curatedLabels.ContainsKey(c[0])) items.Add(new[] { c[0], c[1] });
+            foreach (var c in SENSORS) if (curatedLabels.ContainsKey(c[0])) items.Add(new[] { c[0], I18n.T(c[1]) });
             if (items.Count == 0) return;
 
             col.Children.Add(new TextBlock { Text = I18n.T("Show in overlay"), Foreground = TXT, FontSize = 13, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 14, 0, 8) });
@@ -2811,7 +2812,7 @@ namespace RPMac {
                             status.Text = I18n.T("Driver OK · ")
                                 + fans.Count + (fans.Count == 1 ? I18n.T(" fan") : I18n.T(" fans"))
                                 + " · " + curatedLabels.Count + I18n.T(" sensors")
-                                + (hotKey != null ? I18n.T(" · hottest: ") + CuratedName(hotKey) + " " + FormatTemp(hot) : "")
+                                + (hotKey != null ? I18n.T(" · hottest: ") + I18n.T(CuratedName(hotKey)) + " " + FormatTemp(hot) : "")
                                 + I18n.T(" · updated ") + DateTime.Now.ToString("HH:mm:ss");
                             PushHistory(hotKey == null ? double.NaN : hot,
                                         infos.Count > 0 ? infos[0].Actual : double.NaN,
@@ -2907,7 +2908,7 @@ namespace RPMac {
             foreach (var c in SENSORS) {
                 double v;
                 if (curatedLabels.ContainsKey(c[0]) && OverlaySel(c[0]) && curated.TryGetValue(c[0], out v) && !double.IsNaN(v))
-                    rows.Add(new[] { c[1], FormatTemp(v) });
+                    rows.Add(new[] { I18n.T(c[1]), FormatTemp(v) });
             }
             overlay.Update(rows);
         }
@@ -3250,6 +3251,7 @@ namespace RPMac {
 
     public class App {
         static Mutex mutex;
+        internal const string RELAUNCH_ARG = "--relaunch";
 
         [STAThread]
         public static void Main() {
@@ -3259,8 +3261,16 @@ namespace RPMac {
             bool createdNew;
             mutex = new Mutex(true, "RPMac_singleton_v1", out createdNew);
             if (!createdNew) {
-                try { EventWaitHandle.OpenExisting("RPMac_show_v1").Set(); } catch { }
-                return;
+                // Relaunched by a language switch: the old instance is on its way out, so wait
+                // for it to let go of the SMC and the mutex rather than surfacing its window.
+                bool took = false;
+                if (Array.IndexOf(Environment.GetCommandLineArgs(), RELAUNCH_ARG) >= 0) {
+                    try { took = mutex.WaitOne(10000); } catch (AbandonedMutexException) { took = true; }
+                }
+                if (!took) {
+                    try { EventWaitHandle.OpenExisting("RPMac_show_v1").Set(); } catch { }
+                    return;
+                }
             }
             var showEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "RPMac_show_v1");
 

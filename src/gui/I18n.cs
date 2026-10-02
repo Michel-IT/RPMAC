@@ -40,7 +40,7 @@ namespace RPMac {
             { "Apply RPM", "Applica RPM" },
             { "Apply curve", "Applica curva" },
             { "Copy to all fans", "Copia in tutte le ventole" },
-            { "Highest temp (any sensor)", "Temperatura max (qualsiasi sensore)" },
+            { "Highest temp (any sensor)", "Temp max (ogni sensore)" },
             { "{0:0}–{1:0} RPM range", "{0:0}–{1:0} range RPM" },
             { "Target {0:0} RPM · {1}", "Target {0:0} RPM · {1}" },
             { "controlled by RPMac", "controllato da RPMac" },
@@ -53,7 +53,8 @@ namespace RPMac {
             { "Curve: needs at least two points.", "Curva: richiede almeno due punti." },
             { "Curve: pick a sensor first.", "Curva: seleziona prima un sensore." },
             { "Fan {0}: curve on · {1} · {2} points, {3:0}–{4:0} RPM", "Ventola {0}: curva attiva · {1} · {2} punti, {3:0}–{4:0} RPM" },
-            { "Curve copied to {0} other fan{1}.", "Curva copiata in {0} altra ventola{1}." },
+            { "Curve copied to {0} other fan.", "Curva copiata in {0} altra ventola." },
+            { "Curve copied to {0} other fans.", "Curva copiata in altre {0} ventole." },
             { "{0} → {1:0}", "{0} → {1:0}" },
 
             // ---- History graph ----
@@ -72,7 +73,7 @@ namespace RPMac {
             { "Every temperature key the SMC reports, including ones RPMac can't name.",
               "Ogni chiave di temperatura riportata dal SMC, incluse quelle che RPMac non sa nominare." },
             { "Some Macs expose sensors RPMac doesn't have a name for. Give one a name and it becomes a normal sensor: usable in curves, \"Highest temp\", the overlay, the tray and the CSV.",
-              "Alcuni Mac espongono sensori che RPMac non ha un nome. Assegnane uno e diventerà un sensore normale: utilizzabile in curve, \"Temp max\", overlay, tray e CSV." },
+              "Alcuni Mac espongono sensori per cui RPMac non ha un nome. Assegnane uno e diventerà un sensore normale: utilizzabile in curve, \"Temp max\", overlay, tray e CSV." },
             { "The list fills in once you press \"Show all sensors (raw)\" above.",
               "L'elenco si compila dopo aver premuto \"Mostra tutti i sensori (raw)\" sopra." },
             { "Detecting sensors… (raw, unverified list)", "Rilevamento sensori… (elenco raw non verificato)" },
@@ -95,7 +96,7 @@ namespace RPMac {
             { "Show temperatures in °F", "Mostra temperature in °F" },
             { "Display temperatures in Fahrenheit instead of Celsius.",
               "Mostra le temperature in Fahrenheit invece di Celsius." },
-            { "Smooth fan changes", "Rendeniamento cambi ventola" },
+            { "Smooth fan changes", "Variazioni graduali delle ventole" },
             { "Ignore tiny temperature wobbles and ease the fan down slowly, so a curve doesn't make it audibly hunt up and down.",
               "Ignora piccole oscillazioni di temperatura e riduce la ventola lentamente, così una curva non la fa cercare su e giù in modo udibile." },
 
@@ -180,8 +181,8 @@ namespace RPMac {
             { "Start minimized: off", "Avvio minimizzato: disattivo" },
             { "Temperatures: °F", "Temperature: °F" },
             { "Temperatures: °C", "Temperature: °C" },
-            { "Smoothing: on", "Rendeniamento: attivo" },
-            { "Smoothing: off", "Rendeniamento: disattivo" },
+            { "Smoothing: on", "Variazioni graduali: attive" },
+            { "Smoothing: off", "Variazioni graduali: disattive" },
             { "Emergency cooling: on", "Raffreddamento di emergenza: attivo" },
             { "Emergency cooling: off", "Raffreddamento di emergenza: disattivo" },
             { "Emergency shutdown: on", "Spegnimento di emergenza: attivo" },
@@ -203,7 +204,7 @@ namespace RPMac {
             // ---- Read-only / errors ----
             { "⚠  Read-only mode", "⚠  Modalità sola lettura" },
             { "Couldn't open the I/O driver (InpOut).\nRun the app as administrator.",
-              "Impossibile aprire il driver I/O (InpOut).\\nEsegui l'app come amministratore." },
+              "Impossibile aprire il driver I/O (InpOut).\nEsegui l'app come amministratore." },
 
             // ---- Sensor group names ----
             { "CPU", "CPU" },
@@ -260,7 +261,6 @@ namespace RPMac {
             { "Fan ", "Ventola " },
             { ". Run  shutdown /a  to cancel.", ". Esegui  shutdown /a  per annullare." },
             { "\r\nRun  shutdown /a  to cancel.", "\r\nEsegui  shutdown /a  per annullare." },
-            { "Fan ", "Ventola " },
 
             // ---- Format strings (temperature) ----
             // These contain format placeholders and are used as-is in both languages
